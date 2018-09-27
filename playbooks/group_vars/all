@@ -6,7 +6,7 @@ sku_name: Employee SKU
 disk_free_space: 20
 node_mem: 16384
 node_vcpus: 2
-sizing: fixed
+sizing: relaxed
 bandwidth_limit: 1
 ocp_version: "3.10"
 repos:
@@ -26,7 +26,8 @@ packages:
 - sos
 - psacct
 packages_jumphost:
-- "{{ 'openshift-ansible' if '%0.2f'| format(ocp_version|float) == '3.10'  else 'atomic-openshift-utils atomic-openshift-clients' }}"
+- git
+#- "{{ 'openshift-ansible' if '%0.2f'| format(ocp_version|float) == '3.10'  else 'atomic-openshift-utils atomic-openshift-clients' }}"
 firewall_ports:
 - 4789
 - 8443
@@ -50,8 +51,7 @@ docker_vg: ocp
 docker_version: "1.13"
 docker_prepull_tag: "v{{ '%0.2f'| format(ocp_version|float)  if '%0.2f'| format(ocp_version|float) == '3.10'  else ocp_version }}"
 docker_prepull:
-- registry.access.redhat.com/openshift3/ose-deployer
-- "registry.access.redhat.com/openshift3/{{ 'ose-node-problem-detector' if '%0.2f'| format(ocp_version|float) == '3.10'  else 'ose-sti-builder' }}"
-- registry.access.redhat.com/openshift3/ose-pod
-- registry.access.redhat.com/openshift3/ose-node
-- registry.access.redhat.com/openshift3/ose-docker-builder
+- docker.io/openshift/origin-deployer
+- docker.io/openshift/origin-pod
+- docker.io/openshift/origin-node
+- docker.io/openshift/origin-docker-builder

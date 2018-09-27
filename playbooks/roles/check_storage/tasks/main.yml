@@ -1,8 +1,8 @@
 - shell: |
     if [[ $(df -T / | tail -n 1 | awk '{print $2}') == "btrfs" ]]; then
-      btrfs fi usage --kbytes / | awk '/^.*Free / {print $3}'| sed 's/\..*//'
+      btrfs fi usage --kbytes / | awk '/^.*Free / {print $3}'| sed 's/\..*//' | tail -n 1
     else
-      df -BK / | awk '/^[^Filesystem]/ {print $4}' | sed 's/K//'
+      df -BK / | awk '/^[^Filesystem]/ {print $4}' | sed 's/K//' | tail -n 1
     fi
   changed_when: false
   register: root_space_available

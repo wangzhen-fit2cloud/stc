@@ -49,8 +49,8 @@
   tasks:
     - import_role:
         name: check_disks
-    - import_role:
-        name: check_subscription
+#    - import_role:
+#        name: check_subscription
     - import_role:
         name: check_os
     - import_role:
