@@ -1,6 +1,6 @@
 #!/bin/bash
 
-OCP_VERSION=3.10
+OKD_VERSION=3.10
 CNS_NODES=3
 
 
@@ -29,21 +29,21 @@ if [ ! -f env.yml ]; then
     read req
     [[ $req == "n" ]] && sed -Ei 's/sizing: (.*)/sizing: relaxed/' playbooks/group_vars/all
 
-    echo "Please select OCP Version to install: 3.10, 3.9"
+    echo "Please select OKD Version to install: 3.10, 3.9"
     echo "[3.10] 3.9"
-    read ocp_version
+    read okd_version
 
-    case "$ocp_version" in
-        3.10|3.9) OCP_VERSION=$ocp_version
+    case "$okd_version" in
+        3.10|3.9) OKD_VERSION=$okd_version
             ;;
     esac
 
 
-    sed -Ei "s/ocp_version: (.*)/ocp_version: \"$OCP_VERSION\"/" playbooks/group_vars/all
+    sed -Ei "s/okd_version: (.*)/okd_version: \"$OKD_VERSION\"/" playbooks/group_vars/all
 
-    echo "ocp_version: $OCP_VERSION" > env.yml
+    echo "okd_version: $OKD_VERSION" > env.yml
 
-    echo "*** selected $OCP_VERSION "
+    echo "*** selected $OKD_VERSION "
     echo
 
 
@@ -164,12 +164,12 @@ if [ ! -f env.yml ]; then
 
     done
 
-    echo "cns:" >> env.yml
+    # echo "cns:" >> env.yml
 
-    for (( c=0; c<$CNS_NODES; c++ ))
-    do
-        echo "- ${cns_hosts[$c]}" >> env.yml
-    done
+    # for (( c=0; c<$CNS_NODES; c++ ))
+    # do
+    #     echo "- ${cns_hosts[$c]}" >> env.yml
+    # done
 
 
     echo "Is there any Proxy to use for OpenShift and Container Runtime?"
@@ -225,15 +225,19 @@ if [ ! -f env.yml ]; then
 
     echo "container_disk: $container_disk" >> env.yml
 
+    echo "Useing GlusterFS?"
+    echo "y [n]"
+    read use_glusterfs
 
+    if [[ $use_glusterfs == "y"  ]]; then
+        while  [ -z $ocs_disk ]
+        do
+            echo "Please insert host device used for OCS? (sdc, vdc...). Using lsblk to get information."
+            read -r ocs_disk
+        done
 
-    while  [ -z $ocs_disk ]
-    do
-          echo "Please insert host device used for OCS? (sdc, vdc...). Using lsblk to get information."
-          read -r ocs_disk
-    done
-
-    echo "ocs_disk: $ocs_disk" >> env.yml
+        echo "ocs_disk: $ocs_disk" >> env.yml
+    fi
 
     while  [ -z $ssh_user ]
     do
@@ -243,65 +247,65 @@ if [ ! -f env.yml ]; then
 
     echo "ssh_user: $ssh_user" >> env.yml
 
-    while  [ "$subscription" != "rhsm" -a "$subscription" != "satellite" ];
-    do
-        echo "Please select Subscription management: RHSM or Satellite"
-        echo "[rhsm] satellite"
-        read subscription
-        [[ -z $subscription ]] && subscription="rhsm"
-    done
+    # while  [ "$subscription" != "rhsm" -a "$subscription" != "satellite" ];
+    # do
+    #     echo "Please select Subscription management: RHSM or Satellite"
+    #     echo "[rhsm] satellite"
+    #     read subscription
+    #     [[ -z $subscription ]] && subscription="rhsm"
+    # done
 
 
-    if [ "$subscription" == "rhsm" ]; then
-        while  [ -z $rhsm_username ]
-        do
-            echo "Please insert RHSM username:"
-            read -r rhsm_username
-        done
+    # if [ "$subscription" == "rhsm" ]; then
+    #     while  [ -z $rhsm_username ]
+    #     do
+    #         echo "Please insert RHSM username:"
+    #         read -r rhsm_username
+    #     done
 
-        echo "rhn_username: $rhsm_username" >> env.yml
+    #     echo "rhn_username: $rhsm_username" >> env.yml
 
-        echo '*** registering host to RHSM with username '$rhsm_username
-        sudo subscription-manager register --username $rhsm_username
-        if [ $? != 0 ]; then
-            echo "Error while registering host, please verify credentials"
-            exit 1
-        fi
-        echo 'Please insert pool id if any, leave blank to find out it automatically'
-        read pool_id
-        if [ -z "$pool_id" ]; then
-            echo '*** figuring out subscription pool id'
-            SUBSCRIPTION_POOL_ID=`sudo subscription-manager list --available --matches=*Openshift* --pool-only | head -1 - ` && echo 'subscription_pool_id: '$SUBSCRIPTION_POOL_ID >> env.yml
-        else
-            echo '*** using subscription pool id ' $pool_id
-            SUBSCRIPTION_POOL_ID=$pool_id
-            echo 'subscription_pool_id: '$SUBSCRIPTION_POOL_ID >> env.yml
-        fi
-        #echo '*** attaching host to correct subscription '
-        #sudo subscription-manager attach --pool=$SUBSCRIPTION_POOL_ID
-        #echo '*** disable all repos'
-        #sudo subscription-manager repos --disable='*'
-    else
-        echo '*** registering host to Satellite'
-        while  [ -z $org_id ]
-        do
-            echo "Please insert Organization ID:"
-            read -r org_id
-        done
+    #     echo '*** registering host to RHSM with username '$rhsm_username
+    #     sudo subscription-manager register --username $rhsm_username
+    #     if [ $? != 0 ]; then
+    #         echo "Error while registering host, please verify credentials"
+    #         exit 1
+    #     fi
+    #     echo 'Please insert pool id if any, leave blank to find out it automatically'
+    #     read pool_id
+    #     if [ -z "$pool_id" ]; then
+    #         echo '*** figuring out subscription pool id'
+    #         SUBSCRIPTION_POOL_ID=`sudo subscription-manager list --available --matches=*Openshift* --pool-only | head -1 - ` && echo 'subscription_pool_id: '$SUBSCRIPTION_POOL_ID >> env.yml
+    #     else
+    #         echo '*** using subscription pool id ' $pool_id
+    #         SUBSCRIPTION_POOL_ID=$pool_id
+    #         echo 'subscription_pool_id: '$SUBSCRIPTION_POOL_ID >> env.yml
+    #     fi
+    #     #echo '*** attaching host to correct subscription '
+    #     #sudo subscription-manager attach --pool=$SUBSCRIPTION_POOL_ID
+    #     #echo '*** disable all repos'
+    #     #sudo subscription-manager repos --disable='*'
+    # else
+    #     echo '*** registering host to Satellite'
+    #     while  [ -z $org_id ]
+    #     do
+    #         echo "Please insert Organization ID:"
+    #         read -r org_id
+    #     done
         
-        echo
+    #     echo
 
-        while  [ -z $ak ]
-        do
-            echo "Please insert Activation Key:"
-            read -r ak
-        done
+    #     while  [ -z $ak ]
+    #     do
+    #         echo "Please insert Activation Key:"
+    #         read -r ak
+    #     done
 
-        echo
+    #     echo
 
-        echo "subscription_activationkey: $ak" >> env.yml
-        echo "subscription_org_id: $org_id" >> env.yml
-    fi
+    #     echo "subscription_activationkey: $ak" >> env.yml
+    #     echo "subscription_org_id: $org_id" >> env.yml
+    # fi
 
     echo
     echo "Generated configuration:"
@@ -335,28 +339,28 @@ if [ "$install" == "n" ]; then
     exit 1
 fi
 
-OCP_VERSION=`grep ocp_version env.yml | awk '{print $2;}';`
+OKD_VERSION=`grep okd_version env.yml | awk '{print $2;}';`
 
-if grep subscription_pool_id env.yml >/dev/null; then
-    pool=`grep subscription_pool_id env.yml | awk '{print $2;}';`
-    echo '*** attaching host to correct subscription '
-    sudo subscription-manager attach --pool=$pool
+# if grep subscription_pool_id env.yml >/dev/null; then
+#     pool=`grep subscription_pool_id env.yml | awk '{print $2;}';`
+#     echo '*** attaching host to correct subscription '
+#     sudo subscription-manager attach --pool=$pool
 
-elif grep subscription_org_id env.yml >/dev/null; then
-    org_id=`grep subscription_org_id env.yml | awk '{print $2;}';`
-    activation_key=`grep subscription_activationkey env.yml | awk '{print $2;}';`
-    echo "*** using Organization ID $org_id and Activation Key $activation_key to register host"
+# elif grep subscription_org_id env.yml >/dev/null; then
+#     org_id=`grep subscription_org_id env.yml | awk '{print $2;}';`
+#     activation_key=`grep subscription_activationkey env.yml | awk '{print $2;}';`
+#     echo "*** using Organization ID $org_id and Activation Key $activation_key to register host"
 
-    sudo subscription-manager register --org="$org_id" --activationkey="$activation_key"
-fi
+#     sudo subscription-manager register --org="$org_id" --activationkey="$activation_key"
+# fi
 
 
-echo '*** enable repos needed for OCP'
-echo '*** disable all repos'
-sudo subscription-manager repos --disable='*'
-sudo subscription-manager repos --enable=rhel-7-server-rpms --enable=rhel-7-server-extras-rpms --enable=rhel-7-server-ose-$OCP_VERSION-rpms --enable=rhel-7-fast-datapath-rpms
-echo '*** enable ansible 2.4 repo for OCP '$OCP_VERSION
-sudo subscription-manager repos --enable=rhel-7-server-ansible-2.4-rpms
+# echo '*** enable repos needed for OKD'
+# echo '*** disable all repos'
+# sudo subscription-manager repos --disable='*'
+# sudo subscription-manager repos --enable=rhel-7-server-rpms --enable=rhel-7-server-extras-rpms --enable=rhel-7-server-ose-$OKD_VERSION-rpms --enable=rhel-7-fast-datapath-rpms
+# echo '*** enable ansible 2.4 repo for OKD '$OKD_VERSION
+# sudo subscription-manager repos --enable=rhel-7-server-ansible-2.4-rpms
 
 echo '*** install git and ansible'
 sudo yum install -y git ansible tmux nc screen

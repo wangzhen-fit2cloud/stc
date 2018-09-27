@@ -1,6 +1,6 @@
 #!/bin/sh
 
-OSE_VERS={{ocp_version}}
+OSE_VERS={{okd_version}}
 REG_VERS=2
 UPSTREAM=registry.access.redhat.com
 REGISTRY={{registry}}
@@ -63,21 +63,21 @@ xpaas_images="
   jboss-webserver-3/webserver30-tomcat8-openshift
   jboss-eap-7/eap70-openshift
   redhat-sso-7/sso70-openshift
-  rhscl/postgresql-95-rhel7
+  rhscl/postgresql-95-centos7
 "
 
 cns_images="
-  rhgs3/rhgs-server-rhel7
-  rhgs3/rhgs-volmanager-rhel7
-  rhgs3/rhgs-gluster-block-prov-rhel7
-  rhgs3/rhgs-s3-server-rhel7
+  rhgs3/rhgs-server-centos7
+  rhgs3/rhgs-volmanager-centos7
+  rhgs3/rhgs-gluster-block-prov-centos7
+  rhgs3/rhgs-s3-server-centos7
 "
 
 jenkins_images="
-  openshift3/jenkins-2-rhel7
-  openshift3/jenkins-slave-base-rhel7
-  openshift3/jenkins-slave-maven-rhel7
-  openshift3/jenkins-slave-nodejs-rhel7
+  openshift3/jenkins-2-centos7
+  openshift3/jenkins-slave-base-centos7
+  openshift3/jenkins-slave-maven-centos7
+  openshift3/jenkins-slave-nodejs-centos7
 "
 
 # Configure Docker if needed
@@ -105,7 +105,7 @@ fi
 for img in $ose_images $ose_images_cont $ose_images_opt $cns_images; do
   avail="$(curl -s https://$UPSTREAM/v1/repositories/$img/tags | grep -Po '"v?'${OSE_VERS/\./\\.}'.*?"' | tr -d '"' | sort -V)"
   # rhel7/etcd has its own versioning
-  if [ "$img" = "rhel7/etcd" -o "$img" = "rhgs3/rhgs-server-rhel7" -o "$img" = "rhgs3/rhgs-volmanager-rhel7" -o "$img" = "rhgs3/rhgs-gluster-block-prov-rhel7" -o "$img" = "rhgs3/rhgs-s3-server-rhel7" ]; then
+  if [ "$img" = "rhel7/etcd" -o "$img" = "rhgs3/rhgs-server-centos7" -o "$img" = "rhgs3/rhgs-volmanager-centos7" -o "$img" = "rhgs3/rhgs-gluster-block-prov-centos7" -o "$img" = "rhgs3/rhgs-s3-server-centos7" ]; then
     [ "$USE_SKOPEO" != "yes" ] && docker pull $UPSTREAM/$img
     [ "$USE_SKOPEO"  = "yes" ] && echo Copying $img... && skopeo copy --dest-tls-verify=$SKOPEO_DEST_VERIFY --dest-cert-dir=/etc/docker-distribution/registry docker://$UPSTREAM/$img docker://$REGISTRY/$img
   fi
