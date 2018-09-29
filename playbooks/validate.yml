@@ -21,6 +21,13 @@
   roles:
   - check_proxy
 
+- name: replace repos.
+  hosts: all
+  vars_files:
+  - "{{file_env}}" 
+  roles:
+  - replace_repos
+
 - name: ensure bastion packages.
   hosts: bastion
   gather_facts: yes

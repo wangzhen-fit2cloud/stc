@@ -306,6 +306,12 @@ if [ ! -f env.yml ]; then
     #     echo "subscription_activationkey: $ak" >> env.yml
     #     echo "subscription_org_id: $org_id" >> env.yml
     # fi
+    while  [ -z $repo_ip ]
+    do
+        echo "Please insert SSH username to be used by Ansible:"
+        read -r repo_ip
+    done
+    echo "repo_ip: $repo_ip" >> env.yml 
 
     echo
     echo "Generated configuration:"

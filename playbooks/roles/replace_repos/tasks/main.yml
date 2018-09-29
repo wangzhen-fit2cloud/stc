@@ -1,0 +1,7 @@
+- name: Backup origin repos
+  command: for repo in $(ls /etc/yum.repos.d);do mv $repo ${repo}.bak;done
+
+- name: Create proxy repo 
+  template:
+    src: templates/CentOS-Base-Proxy.repo.j2
+    dest: /etc/yum.repos.d/CentOS-Base-Proxy.repo 
