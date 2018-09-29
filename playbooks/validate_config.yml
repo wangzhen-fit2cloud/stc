@@ -66,5 +66,5 @@
 
   - name: Create Inventory file based on dynamic collected information.
     template:
-      src: "templates/hosts-v{{'%0.2f'| format(okd_version|float)}}.j2"
+      src: "templates/hosts-v{{ '%0.2f'| format(okd_version|float)  if '%0.2f'| format(okd_version|float) == '3.10'  else okd_version }}.j2"
       dest: "{{file_inventory}}"
