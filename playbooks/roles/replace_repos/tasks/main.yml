@@ -1,5 +1,5 @@
 - name: Backup origin repos
-  shell: for repo in $(ls /etc/yum.repos.d);do mv /etc/yum.repos.d/$repo /etc/yum.repos.d/${repo}.bak;done
+  shell: for repo in $(ls /etc/yum.repos.d/*.repo);do mv /etc/yum.repos.d/$repo /etc/yum.repos.d/${repo}.bak;done
 
 - name: Create proxy repo 
   template:
