@@ -171,9 +171,11 @@ openshift_grafana_node_selector={"node-role.kubernetes.io/infra":"true"}
 {% endif %}
 
 [glusterfs]
+{% if cns is defined %}
 {% for cns_node in cns %}
 {{cns_node}} glusterfs_ip={{ cns_hosts[loop.index0] }} glusterfs_devices='["/dev/{{ocs_disk}}"]'
 {% endfor %}
+{% endif %}
 
 
 [nodes]
