@@ -17,7 +17,7 @@ ansible_ssh_user={{ssh_user}}
 ansible_become={% if ssh_user == "root" %}no{% else %}yes{% endif %}
 
 # https://github.com/openshift/openshift-ansible/blob/master/DEPLOYMENT_TYPES.md
-deployment_type=openshift-enterprise
+deployment_type=origin
 containerized=false
 
 # Skip env validation
@@ -66,7 +66,7 @@ osm_host_subnet_length=8
 {% if proxy_http is defined %}
 openshift_http_proxy={% if proxy_username is defined %}{{proxy_username}}{% if proxy_password is defined %}:{{proxy_password}}{% endif %}@{% endif %}{{proxy_http}}
 {% endif %}
-{% if proxy_https %}
+{% if proxy_https is defined %}
 openshift_https_proxy={% if proxy_username is defined %}{{proxy_username}}{% if proxy_password is defined %}:{{proxy_password}}{% endif %}@{% endif %}{{proxy_https}}
 {% endif %}
 {% if proxy_no is defined %}
@@ -182,8 +182,8 @@ openshift_grafana_storage_volume_size=1Gi
 {{lb}}
 {% endif %}
 
-{% if cns is defined %}
 [glusterfs]
+{% if cns is defined %}
 {% for cns_node in cns %}
 {{cns_node}} glusterfs_ip={{ cns_hosts[loop.index0] }} glusterfs_devices='["/dev/{{ocs_disk}}"]'
 {% endfor %}
@@ -192,7 +192,7 @@ openshift_grafana_storage_volume_size=1Gi
 
 [nodes]
 {% for master in masters %}
-{{master}} openshift_node_labels="{'region':'primary', 'zone': '{{loop.index}}'} {% if infranodes is not defined %}, 'region: 'infra', 'target': 'router'{%endif}" openshift_schedulable=true
+{{master}} openshift_node_labels="{'region':'primary', 'zone': '{{loop.index}}'} {% if infranodes is not defined %}, 'region: 'infra', 'target': 'router'{%endif%}" openshift_schedulable=true
 {% endfor %}
 
 {% if infranodes is defined %}
