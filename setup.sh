@@ -308,7 +308,7 @@ if [ ! -f env.yml ]; then
     # fi
     while  [ -z $repo_ip ]
     do
-        echo "Please insert SSH username to be used by Ansible:"
+        echo "Please insert proxy repo IP:"
         read -r repo_ip
     done
     echo "repo_ip: $repo_ip" >> env.yml 

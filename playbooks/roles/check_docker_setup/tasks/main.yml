@@ -31,6 +31,12 @@
     dest: /etc/sysconfig/docker-storage-setup
   when: docker_storage_test.rc != 0
 
+- name: Config insecure registry and mirror
+  template:
+    src: templates/daemon.json.j2
+    dest: /etc/docker/daemon.json
+
+
 - name: Apply Docker storage configuration changes
   command: docker-storage-setup
   when: docker_storage_test.rc != 0
