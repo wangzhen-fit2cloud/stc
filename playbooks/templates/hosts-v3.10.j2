@@ -29,10 +29,6 @@ openshift_clock_enabled=true
 # Set upgrade restart mode for full system restarts
 openshift_rolling_restart_mode=system
 
-# Enable cockpit
-osm_use_cockpit=false
-osm_cockpit_plugins=['cockpit-kubernetes', 'cockpit-pcp', 'setroubleshoot-server']
-
 # Docker / Registry Configuration
 openshift_docker_disable_push_dockerhub=True
 openshift_docker_options="--log-driver=journald --log-level=warn --ipv6=false"
@@ -58,21 +54,9 @@ os_sdn_network_plugin_name=redhat/openshift-ovs-multitenant
 # network blocks should be private and should not conflict with network blocks
 # in your infrastructure that pods may require access to. Can not be changed
 # after deployment.
-osm_cluster_network_cidr=10.1.0.0/16
+osm_cluster_network_cidr=10.128.0.0/14
 openshift_portal_net=172.30.0.0/16
 osm_host_subnet_length=8
-
-#Proxy
-{% if proxy_http is defined %}
-openshift_http_proxy={% if proxy_username is defined %}{{proxy_username}}{% if proxy_password is defined %}:{{proxy_password}}{% endif %}@{% endif %}{{proxy_http}}
-{% endif %}
-{% if proxy_https is defined %}
-openshift_https_proxy={% if proxy_username is defined %}{{proxy_username}}{% if proxy_password is defined %}:{{proxy_password}}{% endif %}@{% endif %}{{proxy_https}}
-{% endif %}
-{% if proxy_no is defined %}
-openshift_no_proxy='{{proxy_no}}'
-{% endif %}
-openshift_generate_no_proxy_hosts=true
 
 # htpasswd auth
 openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider'}]
@@ -170,8 +154,8 @@ openshift_grafana_node_selector={"node-role.kubernetes.io/infra":"true"}
 {{lb}}
 {% endif %}
 
-[glusterfs]
 {% if cns is defined %}
+[glusterfs]
 {% for cns_node in cns %}
 {{cns_node}} glusterfs_ip={{ cns_hosts[loop.index0] }} glusterfs_devices='["/dev/{{ocs_disk}}"]'
 {% endfor %}
@@ -197,3 +181,5 @@ openshift_grafana_node_selector={"node-role.kubernetes.io/infra":"true"}
 {% if bastion is defined %}
 {{bastion}}
 {% endif %}
+[all]
+repo_ip={{repo_ip}}
